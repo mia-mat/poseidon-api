@@ -29,7 +29,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'ws.mia:poseidon-api:1.2.0'
+    implementation 'ws.mia:poseidon-api:1.2.3'
 }
 ```
 
