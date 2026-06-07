@@ -2,6 +2,7 @@ package ws.mia.poseidon.api;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import ws.mia.poseidon.api.model.PoseidonContainer;
 import ws.mia.poseidon.api.model.PoseidonContainerEvent;
 
@@ -121,12 +122,12 @@ public class PoseidonHttpClient implements PoseidonClient {
 							eventName = line.substring("event:".length()).trim();
 						} else if (line.startsWith("data:")) {
 							dataBuffer.append(line.substring("data:".length()).trim());
-						} else if (line.isEmpty() && !dataBuffer.isEmpty()) {
-							// blank line = end of event, dispatch it
+						} else if (line.trim().isEmpty() && !dataBuffer.isEmpty()) {
 							try {
-								PoseidonContainer container = objectMapper.readValue(
-										dataBuffer.toString(), PoseidonContainer.class);
-								onEvent.accept(new PoseidonContainerEvent(eventName, container));
+								JsonNode node = objectMapper.readTree(dataBuffer.toString());
+								PoseidonContainer container = objectMapper.treeToValue(node.get("container"), PoseidonContainer.class);
+								String evtName = node.has("eventName") ? node.get("eventName").asText() : eventName;
+								onEvent.accept(new PoseidonContainerEvent(evtName, container));
 							} catch (Exception e) {
 								onError.accept(new PoseidonClientException("Failed to parse SSE event", e));
 							}

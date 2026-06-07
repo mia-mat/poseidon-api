@@ -7,7 +7,7 @@
 
     <groupId>ws.mia</groupId>
     <artifactId>poseidon-api</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.3</version>
     <name>poseidon-api</name>
     <description>Poseidon shared models</description>
 
