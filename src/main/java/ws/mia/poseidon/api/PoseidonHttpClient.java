@@ -3,14 +3,19 @@ package ws.mia.poseidon.api;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ws.mia.poseidon.api.model.PoseidonContainer;
+import ws.mia.poseidon.api.model.PoseidonContainerEvent;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public class PoseidonHttpClient implements PoseidonClient {
 
@@ -84,6 +89,65 @@ public class PoseidonHttpClient implements PoseidonClient {
 			Thread.currentThread().interrupt();
 			throw new PoseidonClientException("Failed to get version", e);
 		}
+	}
+
+	@Override
+	public Runnable subscribeToEvents(Consumer<PoseidonContainerEvent> onEvent, Consumer<Throwable> onError) {
+		AtomicBoolean cancelled = new AtomicBoolean(false);
+
+		Thread thread = new Thread(() -> {
+			try {
+				HttpRequest request = getHttpBuilder("containers/event-stream")
+						.GET()
+						.header("Accept", "text/event-stream")
+						.build();
+
+				HttpResponse<java.io.InputStream> response = httpClient.send(
+						request, HttpResponse.BodyHandlers.ofInputStream());
+
+				if (!isSuccess(response.statusCode())) {
+					onError.accept(new PoseidonClientException(
+							"Received non-2xx response from Poseidon SSE (%s)".formatted(response.statusCode())));
+					return;
+				}
+
+				try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.body()))) {
+					String eventName = null;
+					StringBuilder dataBuffer = new StringBuilder();
+
+					String line;
+					while (!cancelled.get() && (line = reader.readLine()) != null) {
+						if (line.startsWith("event:")) {
+							eventName = line.substring("event:".length()).trim();
+						} else if (line.startsWith("data:")) {
+							dataBuffer.append(line.substring("data:".length()).trim());
+						} else if (line.isEmpty() && !dataBuffer.isEmpty()) {
+							// blank line = end of event, dispatch it
+							try {
+								PoseidonContainer container = objectMapper.readValue(
+										dataBuffer.toString(), PoseidonContainer.class);
+								onEvent.accept(new PoseidonContainerEvent(eventName, container));
+							} catch (Exception e) {
+								onError.accept(new PoseidonClientException("Failed to parse SSE event", e));
+							}
+							eventName = null;
+							dataBuffer.setLength(0);
+						}
+					}
+				}
+			} catch (IOException e) {
+				if (!cancelled.get()) onError.accept(new PoseidonClientException("SSE connection error", e));
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+		});
+		thread.setDaemon(true);
+		thread.start();
+
+		return () -> {
+			cancelled.set(true);
+			thread.interrupt();
+		};
 	}
 
 	private boolean isSuccess(int statusCode) {
