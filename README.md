@@ -17,7 +17,7 @@ Models and HTTP client for [Poseidon](https://gh.mia.ws/poseidon-core).
 <dependency>
     <groupId>ws.mia</groupId>
     <artifactId>poseidon-api</artifactId>
-    <version>1.2.3</version>
+    <version>1.3.0</version>
 </dependency>
 </dependencies>
 ```
@@ -29,7 +29,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'ws.mia:poseidon-api:1.2.3'
+    implementation 'ws.mia:poseidon-api:1.3.0'
 }
 ```
 

@@ -1,12 +1,19 @@
 package ws.mia.poseidon.api.model;
 
-/**
- * DTO from GitHub Actions or another deployment service to send to Poseidon through its deployment endpoints
- */
 public class PoseidonDeploymentPayload {
+
 	private String image;
 	private String ref;
-	private Repository repository;
+	private String branch;
+
+	private String repository;
+	private String repositoryId;
+
+	private String repositoryOwner;
+	private String repositoryOwnerId;
+
+	private String repositoryName;
+	private String repositoryUrl;
 
 	public String getImage() {
 		return image;
@@ -24,71 +31,74 @@ public class PoseidonDeploymentPayload {
 		this.ref = ref;
 	}
 
-	public Repository getRepository() {
+	public String getBranch() {
+		return branch;
+	}
+
+	public void setBranch(String branch) {
+		this.branch = branch;
+	}
+
+	public String getRepository() {
 		return repository;
 	}
 
-	public void setRepository(Repository repository) {
+	public void setRepository(String repository) {
 		this.repository = repository;
 	}
 
-	public static class Repository {
-		private String name;
-		private String id;
-		private Owner owner;
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public Owner getOwner() {
-			return owner;
-		}
-
-		public void setOwner(Owner owner) {
-			this.owner = owner;
-		}
-
-		public String getId() {
-			return id;
-		}
-
-		public void setId(String id) {
-			this.id = id;
-		}
-
-		@Override
-		public String toString() {
-			return "Repository{" + "name='" + name + '\'' + ", id='" + id + '\'' + ", owner=" + owner + '}';
-		}
+	public String getRepositoryId() {
+		return repositoryId;
 	}
 
-
-	public static class Owner {
-		private String login;
-
-		public String getLogin() {
-			return login;
-		}
-
-		public void setLogin(String login) {
-			this.login = login;
-		}
-
-
-		@Override
-		public String toString() {
-			return "Owner{" + "login='" + login + '\'' + '}';
-		}
+	public void setRepositoryId(String repositoryId) {
+		this.repositoryId = repositoryId;
 	}
 
+	public String getRepositoryOwner() {
+		return repositoryOwner;
+	}
+
+	public void setRepositoryOwner(String repositoryOwner) {
+		this.repositoryOwner = repositoryOwner;
+	}
+
+	public String getRepositoryOwnerId() {
+		return repositoryOwnerId;
+	}
+
+	public void setRepositoryOwnerId(String repositoryOwnerId) {
+		this.repositoryOwnerId = repositoryOwnerId;
+	}
+
+	public String getRepositoryName() {
+		return repositoryName;
+	}
+
+	public void setRepositoryName(String repositoryName) {
+		this.repositoryName = repositoryName;
+	}
+
+	public String getRepositoryUrl() {
+		return repositoryUrl;
+	}
+
+	public void setRepositoryUrl(String repositoryUrl) {
+		this.repositoryUrl = repositoryUrl;
+	}
 
 	@Override
 	public String toString() {
-		return "PoseidonDeploymentPayload{" + "image='" + image + '\'' + ", ref='" + ref + '\'' + ", repository=" + repository + '}';
+		return "PoseidonDeploymentPayload{" +
+				"image='" + image + '\'' +
+				", ref='" + ref + '\'' +
+				", branch='" + branch + '\'' +
+				", repository='" + repository + '\'' +
+				", repositoryId='" + repositoryId + '\'' +
+				", repositoryOwner='" + repositoryOwner + '\'' +
+				", repositoryOwnerId='" + repositoryOwnerId + '\'' +
+				", repositoryName='" + repositoryName + '\'' +
+				", repositoryUrl='" + repositoryUrl + '\'' +
+				'}';
 	}
 }
